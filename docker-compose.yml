@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  billing-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: billing_subscription_engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+psycopg2://billing_user:billing_pass@postgres:5432/billing_db
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - CIRCUIT_BREAKER_FAILURE_THRESHOLD=3
+      - CIRCUIT_BREAKER_RECOVERY_TIMEOUT_SECONDS=15.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: billing_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: billing_user
+      POSTGRES_PASSWORD: billing_pass
+      POSTGRES_DB: billing_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U billing_user -d billing_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
