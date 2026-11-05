@@ -44,13 +44,27 @@ src/billing/
 └── infrastructure/          # Адаптеры внешних систем
     ├── persistence/         # Репозитории хранения данных (InMemory / SQL)
     └── gateways/            # Эмуляторы шлюзов со сценариями сбоев, таймаутов и проверкой идемпотентности
+└── presentation/            # Слой представления (API интерфейс)
+    └── api/                 # FastAPI приложение, Pydantic схемы, маршрутизаторы
 ```
 
 ---
 
-## 🚀 Запуск и тестирование
+## 🌐 Запуск REST API сервера
 
-Все модульные и интеграционные тесты выполняются без внешних зависимостей и БД:
+```powershell
+$env:PYTHONPATH="src"
+uvicorn billing.presentation.api.main:app --reload --port 8000
+```
+
+Интерактивная документация Swagger UI доступна по адресу:  
+`http://localhost:8000/docs`
+
+---
+
+## 🚀 Запуск тестирования
+
+Модульные и интеграционные тесты API выполняются через `pytest`:
 
 ```powershell
 $env:PYTHONPATH="src"
