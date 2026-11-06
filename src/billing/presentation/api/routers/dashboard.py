@@ -1634,12 +1634,15 @@ def build_dashboard_html(initial_window: str = "overview") -> str:
     async function submitPlanChange() {{
       const subId = document.getElementById('proration-sub-select').value;
       const newPlan = document.getElementById('proration-plan-select').value;
+      const targetSub = state.data.subs.find(s => s.id === subId);
 
       const res = await fetch(`/api/v1/subscriptions/${{subId}}/change-plan`, {{
         method: 'POST',
         headers: {{ 'Content-Type': 'application/json' }},
         body: JSON.stringify({{
+          tenant_id: targetSub ? targetSub.tenant_id : 'tenant-demo',
           new_plan_id: newPlan,
+          payment_method_id: 'card-live-token',
           idempotency_key: 'proration-tx-' + Date.now()
         }})
       }});
