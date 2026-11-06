@@ -62,3 +62,25 @@ def test_system_subscriptions_and_invoices_listing(client):
     invs = res_invs.json()
     assert len(invs) >= 1
     assert invs[0]["status"] == "PAID"
+
+
+def test_dashboard_multi_window_routes(client):
+    routes = [
+        "/dashboard",
+        "/dashboard/subscriptions",
+        "/dashboard/invoices",
+        "/dashboard/plans",
+        "/dashboard/resilience",
+        "/dashboard/outbox",
+    ]
+    for r in routes:
+        res = client.get(r)
+        assert res.status_code == 200
+        assert "text/html" in res.headers["content-type"]
+        assert "Subscription Engine" in res.text
+
+
+def test_system_outbox_endpoint(client):
+    res = client.get("/api/v1/system/outbox")
+    assert res.status_code == 200
+    assert isinstance(res.json(), list)
