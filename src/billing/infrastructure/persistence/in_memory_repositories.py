@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from billing.application.ports.outbox import IOutboxRepository
 from billing.application.ports.repositories import (
     IInvoiceRepository,
     IPlanRepository,
@@ -9,6 +10,7 @@ from billing.application.ports.repositories import (
     IUsageRepository,
 )
 from billing.domain.entities import Invoice, Plan, Subscription, Tenant, UsageRecord
+from billing.domain.events import DomainEvent
 
 
 class InMemoryTenantRepository(ITenantRepository):
@@ -105,3 +107,21 @@ class InMemoryUsageRepository(IUsageRepository):
             ):
                 total += r.units
         return total
+
+
+class InMemoryOutboxRepository(IOutboxRepository):
+    def __init__(self) -> None:
+        self._events: List[DomainEvent] = []
+        self._published: set = set()
+
+    def save_event(self, event: DomainEvent) -> None:
+        self._events.append(event)
+
+    def list_unpublished(self, limit: int = 50) -> List[DomainEvent]:
+        return [e for e in self._events if e.event_id not in self._published][:limit]
+
+    def mark_published(self, event_id: str) -> None:
+        self._published.add(event_id)
+
+    def list_all(self) -> List[DomainEvent]:
+        return list(reversed(self._events))

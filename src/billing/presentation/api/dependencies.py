@@ -24,6 +24,7 @@ from billing.infrastructure.gateways.fault_tolerant_gateway import (
 )
 from billing.infrastructure.persistence.in_memory_repositories import (
     InMemoryInvoiceRepository,
+    InMemoryOutboxRepository,
     InMemoryPlanRepository,
     InMemorySubscriptionRepository,
     InMemoryTenantRepository,
@@ -42,6 +43,7 @@ class ServiceContainer:
         self.subscription_repo: ISubscriptionRepository = InMemorySubscriptionRepository()
         self.invoice_repo: IInvoiceRepository = InMemoryInvoiceRepository()
         self.usage_repo: IUsageRepository = InMemoryUsageRepository()
+        self.outbox_repo: InMemoryOutboxRepository = InMemoryOutboxRepository()
         self.payment_gateway: FaultTolerantPaymentGatewayEmulator = FaultTolerantPaymentGatewayEmulator()
         self.circuit_breaker: CircuitBreaker = CircuitBreaker(failure_threshold=3, recovery_timeout_seconds=15.0, name="payment_gateway")
         self.seed_demo_data()

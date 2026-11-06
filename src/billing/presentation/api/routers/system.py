@@ -106,3 +106,27 @@ def list_all_invoices(
             }
         )
     return res
+
+
+@router.get("/outbox")
+def list_outbox_events(
+    container: ServiceContainer = Depends(get_container),
+) -> List[Dict[str, Any]]:
+    events = []
+    if hasattr(container.outbox_repo, "list_all"):
+        raw_events = container.outbox_repo.list_all()
+    elif hasattr(container.outbox_repo, "_events"):
+        raw_events = list(reversed(container.outbox_repo._events))
+    else:
+        raw_events = container.outbox_repo.list_unpublished(limit=50)
+
+    for e in raw_events:
+        events.append(
+            {
+                "event_id": e.event_id,
+                "tenant_id": e.tenant_id,
+                "event_type": e.event_type,
+                "occurred_at": e.occurred_at.isoformat(),
+            }
+        )
+    return events
