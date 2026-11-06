@@ -11,7 +11,7 @@ from billing.application.ports.repositories import (
     IUsageRepository,
 )
 from billing.application.use_cases.change_plan import ChangePlanUseCase
-from billing.application.use_cases.record_usage import RecordUsageUseCase
+from billing.application.use_cases.record_usage import RecordUsageCommand, RecordUsageUseCase
 from billing.application.use_cases.run_billing_cycle import RunBillingCycleUseCase
 from billing.application.use_cases.subscribe_customer import (
     SubscribeCustomerCommand,
@@ -90,15 +90,43 @@ class ServiceContainer:
         self.plan_repo.save(plan_pro)
         self.plan_repo.save(plan_trial)
 
-        # Seed initial customer
+        # Seed initial customers and usage
         sub_uc = self.get_subscribe_use_case()
-        sub_uc.execute(
+        usage_uc = self.get_record_usage_use_case()
+
+        res1 = sub_uc.execute(
             SubscribeCustomerCommand(
                 tenant_id=tenant.id,
                 customer_id="cust-demo-101",
                 plan_id=plan_basic.id,
                 payment_method_id="card-4242",
                 idempotency_key="seed-sub-101",
+            )
+        )
+        usage_uc.execute(
+            RecordUsageCommand(
+                tenant_id=tenant.id,
+                subscription_id=res1.subscription.id,
+                metric_name="api_calls",
+                units=65,
+            )
+        )
+
+        res2 = sub_uc.execute(
+            SubscribeCustomerCommand(
+                tenant_id=tenant.id,
+                customer_id="cust-enterprise-303",
+                plan_id=plan_pro.id,
+                payment_method_id="card-9999",
+                idempotency_key="seed-sub-303",
+            )
+        )
+        usage_uc.execute(
+            RecordUsageCommand(
+                tenant_id=tenant.id,
+                subscription_id=res2.subscription.id,
+                metric_name="api_calls",
+                units=380,
             )
         )
 

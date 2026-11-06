@@ -130,3 +130,28 @@ def list_outbox_events(
             }
         )
     return events
+
+
+@router.get("/usage")
+def list_usage_records(
+    container: ServiceContainer = Depends(get_container),
+) -> List[Dict[str, Any]]:
+    if hasattr(container.usage_repo, "_records"):
+        records = list(reversed(container.usage_repo._records))
+    else:
+        records = []
+
+    res = []
+    for r in records:
+        res.append(
+            {
+                "id": r.id,
+                "tenant_id": r.tenant_id,
+                "customer_id": r.customer_id,
+                "subscription_id": r.subscription_id,
+                "units": r.units,
+                "recorded_at": r.recorded_at.isoformat(),
+            }
+        )
+    return res
+
