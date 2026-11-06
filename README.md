@@ -87,12 +87,14 @@ $env:PYTHONPATH="src"
 python src/billing/presentation/cli/demo_runner.py
 ```
 
-### 2. Запуск REST API сервера:
+### 2. Запуск веб-сервера и визуальной панели управления:
 ```powershell
 $env:PYTHONPATH="src"
 uvicorn billing.presentation.api.main:app --reload --port 8000
 ```
-Интерактивная спецификация Swagger UI: `http://localhost:8000/docs`
+* **Интерактивная панель управления (Dashboard)**: `http://localhost:8000/dashboard`  
+  *(Визуальный светофор Circuit Breaker, статистика выручки, кнопки симуляции сбоя банка, оформление подписок и смена тарифов в реальном времени)*.
+* **Спецификация API (Swagger UI)**: `http://localhost:8000/docs`
 
 ### 3. Запуск полного набора тестов:
 ```powershell

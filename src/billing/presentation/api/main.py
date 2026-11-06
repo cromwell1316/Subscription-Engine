@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from billing.presentation.api.routers import billing, plans, subscriptions, tenants
+from billing.presentation.api.routers import billing, dashboard, plans, subscriptions, system, tenants
 
 
 def create_app() -> FastAPI:
@@ -22,7 +22,9 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Register routers under /api/v1
+    # Register routers under /api/v1 and dashboard
+    app.include_router(dashboard.router)
+    app.include_router(system.router, prefix="/api/v1")
     app.include_router(tenants.router, prefix="/api/v1")
     app.include_router(plans.router, prefix="/api/v1")
     app.include_router(subscriptions.router, prefix="/api/v1")
@@ -37,6 +39,7 @@ def create_app() -> FastAPI:
         return {
             "name": "Multi-Tenant Subscription & Billing Engine",
             "version": "1.0.0",
+            "dashboard": "/dashboard",
             "docs": "/docs",
         }
 

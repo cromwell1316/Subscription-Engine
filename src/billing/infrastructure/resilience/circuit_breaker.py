@@ -76,6 +76,20 @@ class CircuitBreaker:
                 self._state = CircuitState.OPEN
                 self._last_state_change = datetime.now(timezone.utc)
 
+    def trip(self) -> None:
+        """Manually forces the circuit breaker into OPEN state for chaos testing."""
+        with self._lock:
+            self._state = CircuitState.OPEN
+            self._failure_count = self.failure_threshold
+            self._last_state_change = datetime.now(timezone.utc)
+
+    def reset(self) -> None:
+        """Manually resets the circuit breaker back to CLOSED state."""
+        with self._lock:
+            self._state = CircuitState.CLOSED
+            self._failure_count = 0
+            self._last_state_change = datetime.now(timezone.utc)
+
     def call(self, func: Callable[..., T], *args, **kwargs) -> T:
         """Executes the function under the protection of the circuit breaker."""
         if not self.can_execute():
